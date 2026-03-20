@@ -170,11 +170,14 @@ export default function Home() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative w-full h-[100vh] flex flex-col items-center justify-center z-10 px-4 pt-20">
+      <section className="relative w-full h-[100vh] flex flex-col items-center justify-center z-10 px-4 pt-20 overflow-hidden">
         <FloatingDecorations />
         <div className="text-center w-full max-w-5xl flex flex-col items-center">
           
-          <h1 className="text-6xl md:text-[8rem] lg:text-[10rem] font-black tracking-tighter uppercase mb-6 leading-[0.85] overflow-visible pt-16">
+          <h1
+            className="font-black tracking-tighter uppercase mb-4 leading-[0.9] overflow-visible"
+            style={{ fontSize: 'clamp(3rem, 10vw, 9rem)' }}
+          >
             <SplitText text="Train Your" /> <br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
               <SplitText text="Mind With AI" />
@@ -185,7 +188,7 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.8, duration: 1, type: "spring" }}
-            className="-mt-6 mb-8 h-64 flex items-center justify-center"
+            className="-mt-2 mb-6 h-56 flex items-center justify-center"
           >
             <AICharacter />
           </motion.div>
