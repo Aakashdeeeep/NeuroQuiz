@@ -174,7 +174,7 @@ export default function Home() {
         <FloatingDecorations />
         <div className="text-center w-full max-w-5xl flex flex-col items-center">
           
-          <h1 className="text-6xl md:text-[8rem] lg:text-[10rem] font-black tracking-tighter uppercase mb-6 leading-[0.85] overflow-visible">
+          <h1 className="text-6xl md:text-[8rem] lg:text-[10rem] font-black tracking-tighter uppercase mb-6 leading-[0.85] overflow-visible pt-16">
             <SplitText text="Train Your" /> <br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
               <SplitText text="Mind With AI" />
@@ -185,7 +185,7 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.8, duration: 1, type: "spring" }}
-            className="my-12 h-64 flex items-center justify-center"
+            className="-mt-6 mb-8 h-64 flex items-center justify-center"
           >
             <AICharacter />
           </motion.div>
