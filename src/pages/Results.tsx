@@ -7,7 +7,7 @@ import QRCode from "qrcode";
 import { useQuizStore } from "@/store/useQuizStore";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { useUser } from "@clerk/clerk-react";
+import { useUser } from "@clerk/nextjs";
 import { saveChallenge, submitScore } from "@/lib/firebase";
 import { Leaderboard } from "@/components/ui/Leaderboard";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
+import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { useQuizStore } from "@/store/useQuizStore";
 import CustomCursor from "@/components/ui/CustomCursor";
@@ -24,15 +24,6 @@ function ThemeManager({ children }: { children: React.ReactNode }) {
   }, [appTheme, isOverclocked]);
 
   return <>{children}</>;
-}
-
-export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      <SignedIn>{children}</SignedIn>
-      <SignedOut><RedirectToSignIn /></SignedOut>
-    </>
-  );
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

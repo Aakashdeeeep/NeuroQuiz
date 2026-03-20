@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { AICharacter } from "@/components/ui/AICharacter";
 import FloatingDecorations from "@/components/ui/FloatingDecorations";
 import { useQuizStore } from "@/store/useQuizStore";
-import { SignInButton, useAuth, UserButton } from "@clerk/clerk-react";
+import { SignInButton, useAuth, UserButton } from "@clerk/nextjs";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, useGSAP);
