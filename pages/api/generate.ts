@@ -13,7 +13,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.VITE_GEMINI_API_KEY || "" });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || "" });
 
 async function withRetry<T>(fn: () => Promise<T>, maxAttempts = 3): Promise<T> {
   const delays = [5000, 10000, 20000];
