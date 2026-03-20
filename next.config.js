@@ -26,6 +26,11 @@ const nextConfig = {
     unoptimized: true,
   },
 
+  // Disable ESLint during builds (Vite codebase has different lint rules)
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   // Disable telemetry to reduce background processes
   env: {
     NEXT_TELEMETRY_DISABLED: '1',
