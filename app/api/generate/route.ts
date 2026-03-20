@@ -1,16 +1,4 @@
-/**
- * Next.js API Route: /api/generate
- *
- * This server-side route receives a quiz generation request and calls
- * the Google Gemini API securely from the server — meaning the API key
- * never leaves the backend and is never exposed in the browser bundle.
- *
- * Method: POST
- * Body: { topic: string, numQuestions: number, difficulty: string }
- * Returns: { questions: Question[] }
- */
-
-import type { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || "" });
@@ -35,18 +23,15 @@ async function withRetry<T>(fn: () => Promise<T>, maxAttempts = 3): Promise<T> {
   throw lastError;
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed. Use POST." });
-  }
+export async function POST(req: Request) {
+  try {
+    const { topic, numQuestions, difficulty } = await req.json();
 
-  const { topic, numQuestions, difficulty } = req.body;
+    if (!topic || !numQuestions || !difficulty) {
+      return NextResponse.json({ error: "Missing required fields: topic, numQuestions, difficulty" }, { status: 400 });
+    }
 
-  if (!topic || !numQuestions || !difficulty) {
-    return res.status(400).json({ error: "Missing required fields: topic, numQuestions, difficulty" });
-  }
-
-  const prompt = `Generate a quiz about "${topic}" with a MIX of exactly these three question types:
+    const prompt = `Generate a quiz about "${topic}" with a MIX of exactly these three question types:
 - "mcq": Multiple choice with 4 options
 - "true_false": True or False question (options must be exactly ["True", "False"])
 - "fill_blank": Fill in the blank (the question text must contain "___" where the answer goes, NO options array — set options to [])
@@ -66,7 +51,6 @@ Return ONLY a valid JSON array. Each object MUST follow this exact structure:
   }
 ]`;
 
-  try {
     const result = await withRetry(async () => {
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
@@ -77,9 +61,9 @@ Return ONLY a valid JSON array. Each object MUST follow this exact structure:
       return JSON.parse(response.text);
     });
 
-    return res.status(200).json({ questions: result });
+    return NextResponse.json({ questions: result }, { status: 200 });
   } catch (err: unknown) {
     console.error("Gemini API error:", err);
-    return res.status(500).json({ error: (err as Error)?.message || "Failed to generate quiz." });
+    return NextResponse.json({ error: (err as Error)?.message || "Failed to generate quiz." }, { status: 500 });
   }
 }
