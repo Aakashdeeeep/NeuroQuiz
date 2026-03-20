@@ -8,6 +8,7 @@ import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { Button } from "@/components/ui/Button";
 import { AICharacter } from "@/components/ui/AICharacter";
+import FloatingDecorations from "@/components/ui/FloatingDecorations";
 import { useQuizStore } from "@/store/useQuizStore";
 import { SignInButton, useAuth, UserButton } from "@clerk/clerk-react";
 
@@ -170,6 +171,7 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative w-full h-[100vh] flex flex-col items-center justify-center z-10 px-4 pt-20">
+        <FloatingDecorations />
         <div className="text-center w-full max-w-5xl flex flex-col items-center">
           
           <h1 className="text-6xl md:text-[8rem] lg:text-[10rem] font-black tracking-tighter uppercase mb-6 leading-[0.85] overflow-visible">
