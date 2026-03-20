@@ -1,84 +1,109 @@
-# 🧠 Knowledge Lab (NeuroQuiz)
+# Knowledge Lab
 
-Welcome to **Knowledge Lab**, a futuristic, AI-powered quiz application designed to test your mental limits on literally any topic in the universe. 
+Knowledge Lab is an AI-powered quiz application that generates unique, exam-quality questions on any topic you can think of. There are no pre-written question banks here — every quiz is created on the fly by a large language model, graded instantly, and logged to your personal history. You can also share a quiz you just took as a challenge link, letting your friends race against your score on a global leaderboard.
 
-Forget boring, pre-written multiple-choice questions. This app generates dynamic, unique quizzes on-the-fly using the power of AI, grades you in real-time, and lets you challenge your friends on global leaderboards.
-
-![Knowledge Lab Screenshot](#) *(Add a screenshot here later!)*
+The project was built for a hackathon. The goal was to build something that genuinely felt impressive to use, so we went deep on animation, sound design, and user experience to make it feel less like a study tool and more like something you would actually want to open.
 
 ---
 
-## 🚀 Why We Built This
-Learning shouldn't feel like staring at a 1990s textbook. We wanted to build something that feels like you're jacking into the Matrix—a sleek, fast, and intensely engaging experience that actually makes you *want* to test your knowledge. 
+## What the Application Does
 
-The goal was simple: **If a user wants to learn about "Quantum Physics" or "14th Century French History", they shouldn't have to wait for us to hire a teacher to write a quiz.** By hooking up a powerful AI, we gave the user the ultimate flexible learning tool.
+When you open the app, you are asked to type in any topic, pick a difficulty level, and choose how many questions you want. The app sends that request to Google's Gemini AI and gets back a structured JSON response with multiple choice, true/false, and fill-in-the-blank questions — complete with explanations and hints for each one.
 
----
+Once you finish the quiz, you land on a results page that shows your score, time taken, and accuracy. From there you can generate a shareable challenge link. That link encodes the exact quiz you just took and saves it to a cloud database. When a friend opens that link and finishes the quiz, their score is submitted to a real-time leaderboard that both of you can see instantly, without refreshing the page.
 
-## 🛠 Architecture & The "Why" Behind Our Tech Decisions
-
-If you look under the hood, you might notice something interesting: **We don't have a traditional backend database or a heavy Node.js/Express server.** 
-
-Why? Because the modern web is all about speed, scale, and APIs. Here is exactly what we did and why we did it:
-
-### 1. The "Open API" Backend (Google Gemini AI)
-Instead of building a massive, clunky database of a million quiz questions (which would get outdated fast), we hit the **Google Gemini API** directly from the client. 
-- **The Why:** This turns the app into a "zero-maintenance" machine. The AI dynamically generates fresh questions, wrong answers, correct answers, and detailed *explanations* every single time you hit "Start". The knowledge base is literally the entire internet.
-
-### 2. The Serverless Cloud (Firebase / Firestore)
-When you challenge a friend, we need a place to save the exact quiz you took and track everyone's scores. We used **Firebase Firestore** as an open, real-time NoSQL database.
-- **The Why:** Building custom user-auth and websockets for real-time leaderboards is exhausting and expensive. Firebase lets us simply say "save this JSON object" and automatically syncs the leaderboard across everyone's screens instantly via websockets (`onSnapshot`). It's fast, free, and scales infinitely without us writing a single line of backend routing code.
-
-### 3. The Front Door (Clerk Authentication)
-We used **Clerk.dev** to handle user logins (Google, GitHub, email).
-- **The Why:** Security is hard. Clerk provides a beautiful, pre-built UI and iron-clad security out of the box. We get secure user IDs, profile pictures, and session management in literally three lines of code.
-
-### 4. The Interface (React, Vite, Tailwind, Framer Motion)
-The frontend is built for pure speed and aesthetics. 
-- **Vite** makes our local development lightning fast.
-- **Tailwind CSS** lets us build stunning, glassmorphism UI components without writing messy CSS files.
-- **Zustand** acts as our memory bank, keeping track of your history and theme preferences flawlessly.
-- **Framer Motion & GSAP** handle the heavy lifting of making buttons super magnetic, cards flip, background elements float organically, and the interactive AI robotic companion react to your clicks.
+Your quiz history is stored locally and displayed on a separate page where you can see a weekly heatmap of your activity, your best and worst topics, and a detailed review of each past quiz — including which answers you got wrong and the AI's explanation for the correct answer.
 
 ---
 
-## 🤖 Meet the AI Companion
-One of our favorite features is the little robotic face on the home screen. It's not just a PNG! It acts as your guide. If you do well on a quiz, it smiles. If you click it too many times, it "overclocks" and turns the whole application red with alarm sirens. We added this strictly for *joy*—because applications should be fun to use.
+## Why There Is No Traditional Backend
+
+This is probably the first question anyone who looks at the codebase will ask. There is no Node.js server. There is no REST API we wrote. There is no database schema we designed. Here is the honest reason for each decision:
+
+**On Gemini API called directly from the browser**
+
+The quiz generation call goes from the user's browser directly to Google's Gemini API. In a production application with paying users this would be a problem because your API key would be exposed. But for a hackathon demo, and for a tool where the key usage is tied to your own account, this approach has a significant advantage: there is no server to maintain, no deployment to manage for the generation layer, and no latency added by proxying through a middleman. The questions come back in roughly two seconds. We also implemented automatic retry logic with exponential backoff so that if the API rate limits us, the app quietly waits and tries again instead of showing an error.
+
+**On Firebase Firestore for the challenge and leaderboard data**
+
+When you generate a challenge link, the full set of questions gets saved to Firestore under a randomly generated document ID. That ID becomes the URL parameter. When a friend opens the link, the app fetches those exact questions and runs the quiz. When they finish, their score is written into a sub-collection of that challenge document.
+
+The reason we chose Firestore instead of building a traditional database was the real-time subscription feature. Firestore's `onSnapshot` listener opens a persistent connection and pushes updates to every connected client the millisecond a new document is written. This meant we got a live leaderboard — where scores appear on screen as other people submit — without writing a single line of WebSocket code. It also meant we got horizontal scaling and global replication for free, which would have taken weeks to set up on a self-hosted server.
+
+**On Clerk for authentication**
+
+User authentication is genuinely difficult to get right. Session management, password hashing, OAuth flows, token rotation — each of these is a category of security vulnerability on its own. Clerk handles all of it. We get a beautiful, pre-built sign-in component, Google and GitHub OAuth, secure user sessions, and a user object with a stable ID attached to every request. The integration is three lines of code in our root component. We would have spent a full day building something far less secure.
 
 ---
 
-## 📈 The Neural Archives (Your History)
-Every quiz you take is logged locally. We process this data to generate your **Weekly Performance Heatmap** and track your best and worst topics. You can always expand an old quiz to see exactly which questions you got wrong and read the AI's explanation for the correct answer.
+## State Management Design
+
+All client-side state — current quiz, history, theme preference, voice settings, AI character reactions — lives in a Zustand store. Zustand was chosen over Redux because it has almost no boilerplate and the store reads like plain JavaScript functions. The store is wrapped with a `persist` middleware that saves specific fields (`history`, `appTheme`, `isVoiceEnabled`) to `localStorage` automatically, which is how your history and theme preferences survive page refreshes and browser restarts.
+
+One subtle design decision worth noting: we only store the full question and answer data for the three most recent history entries. For entries beyond that, the bulky nested arrays are stripped out and only the metadata is kept. This prevents `localStorage` from hitting its 5MB browser limit even after hundreds of quiz attempts.
 
 ---
 
-## 💻 How to Run It Locally
+## The AI Character
 
-If you want to spin up your own Knowledge Lab, it’s effortless:
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Aakashdeeeep/NeuroQuiz.git
-   cd NeuroQuiz
-   ```
-
-2. Install the dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Set up your `.env.local` file (You'll need free API keys from Clerk, Google Gemini, and Firebase):
-   ```env
-   VITE_CLERK_PUBLISHABLE_KEY=your_clerk_key
-   VITE_GEMINI_API_KEY=your_gemini_key
-   VITE_FIREBASE_API_KEY=your_firebase_key
-   # ... plus the rest of your Firebase config
-   ```
-
-4. Start the engine:
-   ```bash
-   npm run dev
-   ```
+The robotic figure on the home screen is not just decorative. It reads reactions from the global store and changes its expression based on your quiz performance. If you click it rapidly five or more times within two seconds, it enters an "overclocked" mode which turns the entire color palette red and plays an alarm sound. The overclock expires after seven seconds and the theme restores itself. This behavior is driven purely by a `isOverclocked` flag in the Zustand store, watched by both the character component and the root `App` component which owns the `data-theme` attribute on the document.
 
 ---
-*Built with ❤️ (and a lot of caffeine) by Aakashdeep.*
+
+## Tech Stack Summary
+
+| Layer | Technology | Why |
+|---|---|---|
+| Framework | React + Vite | Fast HMR during development, minimal build config |
+| Language | TypeScript | Catches type errors before they reach users |
+| Styling | Tailwind CSS + CSS variables | Design tokens let the light/dark/overclocked themes share one stylesheet |
+| Animation | Framer Motion + GSAP | Framer for component-level transitions, GSAP for scroll-driven effects on the home page |
+| State | Zustand with persist middleware | Minimal boilerplate, localStorage sync out of the box |
+| Auth | Clerk | Managed OAuth, sessions, and user profiles in three lines |
+| AI | Google Gemini (gemini-2.5-flash) | Structured JSON output mode gives predictable question format every time |
+| Cloud DB | Firebase Firestore | Real-time subscriptions for live leaderboards, no server required |
+| Deployment | Vercel | Zero-config deployment from GitHub with automatic rebuilds on push |
+
+---
+
+## Running Locally
+
+You will need free accounts on Clerk, Google AI Studio (for the Gemini API), and Firebase to get a full working instance.
+
+1.  Clone the repository and install dependencies:
+    ```bash
+    git clone https://github.com/Aakashdeeeep/NeuroQuiz.git
+    cd NeuroQuiz
+    npm install
+    ```
+
+2.  Create a `.env.local` file in the project root and fill in your keys:
+    ```
+    VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+    CLERK_SECRET_KEY=sk_test_...
+    VITE_GEMINI_API_KEY=AIza...
+    VITE_FIREBASE_API_KEY=...
+    VITE_FIREBASE_AUTH_DOMAIN=...
+    VITE_FIREBASE_PROJECT_ID=...
+    VITE_FIREBASE_STORAGE_BUCKET=...
+    VITE_FIREBASE_MESSAGING_SENDER_ID=...
+    VITE_FIREBASE_APP_ID=...
+    ```
+
+3.  Start the development server:
+    ```bash
+    npm run dev
+    ```
+    The app will be available at `http://localhost:5173`.
+
+---
+
+## Known Limitations
+
+- The Gemini API is called directly from the browser, which exposes the API key in client bundles. This is acceptable for a demo but should be proxied through a server-side function before any public production release.
+- Quiz history is stored in `localStorage` and is therefore device-specific. There is no cross-device sync.
+- Firebase Firestore is currently running in Test Mode, which means anyone with the database URL can read and write. Security rules should be tightened before moving beyond a demo context.
+
+---
+
+Built by Aakashdeep.
