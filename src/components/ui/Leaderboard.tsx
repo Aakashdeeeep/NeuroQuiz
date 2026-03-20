@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { 
-  getFirestore, collection, query, orderBy, limit, onSnapshot
+  collection, query, orderBy, limit, onSnapshot
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { LeaderboardEntry } from "@/lib/firebase";
