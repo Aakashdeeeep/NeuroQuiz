@@ -5,12 +5,12 @@ import { useQuizStore } from "@/store/useQuizStore";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Leaderboard } from "@/components/ui/Leaderboard";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 export default function History() {
   const { history, clearHistory, deleteHistoryItem } = useQuizStore();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<Record<string, "questions" | "leaderboard">>({});
 
@@ -88,7 +88,7 @@ export default function History() {
             <Button variant="ghost" className="text-xs px-4" onClick={() => clearHistory()} disabled={history.length === 0}>
               Clear Archives
             </Button>
-            <Button variant="primary" onClick={() => navigate("/")}>
+            <Button variant="primary" onClick={() => router.push("/")}>
               Home
             </Button>
           </div>
@@ -156,7 +156,7 @@ export default function History() {
             <p className="text-gray-400 text-sm max-w-sm leading-relaxed mb-6">
               You haven't completed any knowledge protocols yet. Run a neural scan to record performance data.
             </p>
-            <Button variant="primary" onClick={() => navigate("/setup")}>Launch Protocol</Button>
+            <Button variant="primary" onClick={() => router.push("/setup")}>Launch Protocol</Button>
           </motion.div>
         ) : (
           <div className="grid gap-4">

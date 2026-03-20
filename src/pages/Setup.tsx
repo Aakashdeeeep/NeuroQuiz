@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuizStore } from "@/store/useQuizStore";
 import { Button } from "@/components/ui/Button";
@@ -26,8 +26,8 @@ const HACKER_PHRASES = [
 ];
 
 function SetupContent() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { setConfig, setIsGenerating, isGenerating, setQuestions, startQuiz, setAiReaction, setChallengeId } = useQuizStore();
   
   const [topic, setTopic] = useState("");
@@ -36,8 +36,8 @@ function SetupContent() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const [hackerPhrase, setHackerPhrase] = useState(HACKER_PHRASES[0]);
-  const isChallenge = searchParams.get('challenge') === 'true';
-  const incomingChallengeId = searchParams.get('challengeId');
+  const isChallenge = searchParams?.get('challenge') === 'true';
+  const incomingChallengeId = searchParams?.get('challengeId');
   const [isChallengeLoading, setIsChallengeLoading] = useState(false);
 
   // Ambient audio on mount
@@ -72,9 +72,9 @@ function SetupContent() {
         setIsChallengeLoading(false);
       });
     } else if (isChallenge) {
-      const t = searchParams.get('topic');
-      const d = searchParams.get('difficulty');
-      const n = searchParams.get('numQuestions');
+      const t = searchParams?.get('topic');
+      const d = searchParams?.get('difficulty');
+      const n = searchParams?.get('numQuestions');
       if (t) setTopic(decodeURIComponent(t));
       if (d && ["Easy", "Medium", "Hard"].includes(d)) setDifficulty(d as any);
       if (n) setNumQuestions(n);
@@ -113,7 +113,7 @@ function SetupContent() {
       }
       
       startQuiz();
-      navigate("/quiz");
+      router.push("/quiz");
     } catch (err: any) {
       console.error(err);
       setError(err.message || "An error occurred during neural synthesis. Target API might be rate limited.");
@@ -135,7 +135,7 @@ function SetupContent() {
         <motion.div 
            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
            className="font-bold text-xl tracking-tighter cursor-pointer"
-           onClick={() => navigate('/')}
+           onClick={() => router.push('/')}
         >
           KNOWLEDGE<span className="text-secondary">LAB</span>
         </motion.div>

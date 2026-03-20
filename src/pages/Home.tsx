@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
@@ -46,7 +46,7 @@ const ScrubText = ({ text, className }: { text: string, className?: string }) =>
 
 
 export default function Home() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const container = useRef<HTMLDivElement>(null);
   const { history } = useQuizStore();
   const { isSignedIn } = useAuth();
@@ -157,7 +157,7 @@ export default function Home() {
               <span className="text-gray-500">· {bestAttempt.topic.substring(0, 14)}...</span>
             </div>
           )}
-          <Button variant="ghost" size="sm" onClick={() => navigate('/history')}>History</Button>
+          <Button variant="ghost" size="sm" onClick={() => router.push('/history')}>History</Button>
           
           {!isSignedIn ? (
             <SignInButton mode="modal">
@@ -261,7 +261,7 @@ export default function Home() {
         </h2>
         
         <div className="mt-8 scale-110">
-          <Button size="lg" onClick={() => navigate('/setup')} className="text-2xl px-16 py-8 rounded-full shadow-[0_0_30px_rgba(0,240,255,0.3)]">
+          <Button size="lg" onClick={() => router.push('/setup')} className="text-2xl px-16 py-8 rounded-full shadow-[0_0_30px_rgba(0,240,255,0.3)]">
             Initiate Protocol
           </Button>
         </div>

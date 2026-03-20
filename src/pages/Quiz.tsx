@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuizStore } from "@/store/useQuizStore";
 import { Button } from "@/components/ui/Button";
@@ -59,7 +59,7 @@ function FillBlankInput({ onSubmit, currentAnswer }: { onSubmit: (val: string) =
 }
 
 export default function QuizPage() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { 
     questions, 
     currentQuestionIndex, 
@@ -88,11 +88,11 @@ export default function QuizPage() {
   useEffect(() => {
     setIsClient(true);
     if (questions.length === 0) {
-      navigate("/setup");
+      router.push("/setup");
     }
     startAmbientTrack();
     return () => stopAmbientTrack();
-  }, [questions, navigate]);
+  }, [questions, router]);
 
   // Reset timer and feedback on question change
   useEffect(() => {
@@ -175,11 +175,11 @@ export default function QuizPage() {
       endQuiz();
       saveAttempt();
       setAiReaction("none"); // 🔄 Reset robot back to idle before leaving
-      navigate("/results");
+      router.push("/results");
     } else {
       nextQuestion();
     }
-  }, [isLastQuestion, endQuiz, saveAttempt, navigate, nextQuestion, setAiReaction]);
+  }, [isLastQuestion, endQuiz, saveAttempt, router, nextQuestion, setAiReaction]);
 
   // Power-User Keyboard Shortcuts
   useEffect(() => {

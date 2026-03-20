@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import QRCode from "qrcode";
 import { useQuizStore } from "@/store/useQuizStore";
@@ -55,7 +55,7 @@ function Confetti() {
 }
 
 export default function ResultsPage() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { topic, difficulty, questions, answers, endTime, startTime, resetQuiz, challengeId, setChallengeId, updateLatestAttemptChallengeId } = useQuizStore();
   const { user } = useUser();
   
@@ -84,9 +84,9 @@ export default function ResultsPage() {
   useEffect(() => {
     setIsClient(true);
     if (questions.length === 0) {
-      navigate("/");
+      router.push("/");
     }
-  }, [questions, navigate]);
+  }, [questions, router]);
 
   // Auto-submit score to leaderboard if this is a Shared Challenge
   // Must be above conditional return to satisfy React's Rules of Hooks
@@ -107,7 +107,7 @@ export default function ResultsPage() {
 
   const handleRetake = () => {
     resetQuiz();
-    navigate("/setup");
+    router.push("/setup");
   };
 
   const generateHoloCertificate = () => {
@@ -429,7 +429,7 @@ export default function ResultsPage() {
           <Button variant="ghost" onClick={handleRetake} className="px-8 py-4 bg-surface hover:bg-surface-hover border border-border">
             New Protocol
           </Button>
-          <Button variant="ghost" onClick={() => navigate('/history')} className="px-8 py-4 border border-border bg-surface hover:bg-surface-hover hover:border-foreground text-foreground">
+          <Button variant="ghost" onClick={() => router.push('/history')} className="px-8 py-4 border border-border bg-surface hover:bg-surface-hover hover:border-foreground text-foreground">
             View Archives
           </Button>
         </motion.div>

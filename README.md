@@ -20,9 +20,9 @@ Your quiz history is stored locally and displayed on a separate page where you c
 
 This is probably the first question anyone who looks at the codebase will ask. There is no Node.js server. There is no REST API we wrote. There is no database schema we designed. Here is the honest reason for each decision:
 
-**On Gemini API called directly from the browser**
+**On next.js API routes for Gemini**
 
-The quiz generation call goes from the user's browser directly to Google's Gemini API. In a production application with paying users this would be a problem because your API key would be exposed. But for a hackathon demo, and for a tool where the key usage is tied to your own account, this approach has a significant advantage: there is no server to maintain, no deployment to manage for the generation layer, and no latency added by proxying through a middleman. The questions come back in roughly two seconds. We also implemented automatic retry logic with exponential backoff so that if the API rate limits us, the app quietly waits and tries again instead of showing an error.
+The quiz generation call is proxied through a Next.js server-side API Route (`/api/generate`). In a purely client-side React app, calling Gemini directly from the browser would expose the API key. By migrating to Next.js App Router, we keep the deployment entirely serverless but perfectly secure the API key backend. The questions still generate in roughly two seconds. We also implemented automatic retry logic with exponential backoff so that if the API rate limits us, the app quietly waits and tries again instead of showing an error.
 
 **On Firebase Firestore for the challenge and leaderboard data**
 
@@ -65,7 +65,7 @@ The robotic figure on the home screen is not just decorative. It reads reactions
 
 | Layer | Technology | Why |
 |---|---|---|
-| Framework | React + Vite | Fast HMR during development, minimal build config |
+| Framework | Next.js App Router | Required by hackathon, provides secure API routes and seamless App Router conventions |
 | Language | TypeScript | Catches type errors before they reach users |
 | Styling | Tailwind CSS + CSS variables | Design tokens let the light/dark/overclocked themes share one stylesheet |
 | Animation | Framer Motion + GSAP | Framer for component-level transitions, GSAP for scroll-driven effects on the home page |
@@ -90,28 +90,27 @@ You will need free accounts on Clerk, Google AI Studio (for the Gemini API), and
 
 2.  Create a `.env.local` file in the project root and fill in your keys:
     ```
-    VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
     CLERK_SECRET_KEY=sk_test_...
-    VITE_GEMINI_API_KEY=AIza...
-    VITE_FIREBASE_API_KEY=...
-    VITE_FIREBASE_AUTH_DOMAIN=...
-    VITE_FIREBASE_PROJECT_ID=...
-    VITE_FIREBASE_STORAGE_BUCKET=...
-    VITE_FIREBASE_MESSAGING_SENDER_ID=...
-    VITE_FIREBASE_APP_ID=...
+    NEXT_PUBLIC_GEMINI_API_KEY=AIza...
+    NEXT_PUBLIC_FIREBASE_API_KEY=...
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+    NEXT_PUBLIC_FIREBASE_APP_ID=...
     ```
 
 3.  Start the development server:
     ```bash
     npm run dev
     ```
-    The app will be available at `http://localhost:5173`.
+    The app will be available at `http://localhost:3000`.
 
 ---
 
 ## Known Limitations
 
-- The Gemini API is called directly from the browser, which exposes the API key in client bundles. This is acceptable for a demo but should be proxied through a server-side function before any public production release.
 - Quiz history is stored in `localStorage` and is therefore device-specific. There is no cross-device sync.
 - Firebase Firestore is currently running in Test Mode, which means anyone with the database URL can read and write. Security rules should be tightened before moving beyond a demo context.
 

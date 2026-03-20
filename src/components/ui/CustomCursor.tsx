@@ -56,14 +56,16 @@ export default function CustomCursor() {
     <>
       {/* Outer ring */}
       <motion.div
-        className="fixed top-0 left-0 w-8 h-8 rounded-full border-2 border-primary pointer-events-none z-[99999] mix-blend-screen hidden md:block"
+        className="fixed top-0 left-0 w-8 h-8 rounded-full border-2 border-primary pointer-events-none mix-blend-screen hidden md:block"
+        style={{ zIndex: 2147483647 }}
         variants={variants}
         animate={isHovering ? "hover" : "default"}
         transition={{ type: "spring", stiffness: 500, damping: 28, mass: 0.5 }}
       />
       {/* Inner dot */}
       <motion.div
-        className="fixed top-0 left-0 w-2 h-2 bg-primary rounded-full pointer-events-none z-[99999] shadow-[0_0_10px_#00f0ff] hidden md:block"
+        className="fixed top-0 left-0 w-2 h-2 bg-primary rounded-full pointer-events-none shadow-[0_0_10px_#00f0ff] hidden md:block"
+        style={{ zIndex: 2147483647 }}
         animate={{
           x: mousePosition.x - 4,
           y: mousePosition.y - 4,
