@@ -26,9 +26,20 @@ The quiz generation call goes from the user's browser directly to Google's Gemin
 
 **On Firebase Firestore for the challenge and leaderboard data**
 
-When you generate a challenge link, the full set of questions gets saved to Firestore under a randomly generated document ID. That ID becomes the URL parameter. When a friend opens the link, the app fetches those exact questions and runs the quiz. When they finish, their score is written into a sub-collection of that challenge document.
+When you generate a challenge link, the full set of questions gets saved to Firestore under a randomly generated document ID. That ID becomes the URL parameter. When a friend opens the link, the app fetches those exact questions and runs the quiz. When they finish, their score is written into a sub-collection of that same challenge document.
 
-The reason we chose Firestore instead of building a traditional database was the real-time subscription feature. Firestore's `onSnapshot` listener opens a persistent connection and pushes updates to every connected client the millisecond a new document is written. This meant we got a live leaderboard — where scores appear on screen as other people submit — without writing a single line of WebSocket code. It also meant we got horizontal scaling and global replication for free, which would have taken weeks to set up on a self-hosted server.
+This brings up a question worth answering properly: why not just use a traditional Node.js server with a PostgreSQL or MongoDB database?
+
+The answer comes down to who needs access to the data and how.
+
+In this application, two completely different users — the person who created the challenge and the friend who accepted it — both need to read and write to the exact same record in the database. In a traditional Node.js setup, you would first have to design a `challenges` table, then a `leaderboard_entries` table with a foreign key relationship back to it. Then you would write REST API routes like `GET /api/challenges/:id` and `POST /api/scores/:id`. Then you would add authentication middleware to verify who is allowed to touch each record. Then you would deploy and maintain that server. Both the creator's browser and the friend's browser would have to go through your server as a middleman on every single request.
+
+With Firestore, there is no server and no schema. Both browsers use the same Firestore SDK and connect directly to the database. The challenge data lives at a path like `challenges/{id}` and scores are written to a sub-collection at `challenges/{id}/leaderboard`. The creator writes to that path when they publish. The friend reads from it when they open the link and writes their score when they finish.
+
+The real-time part is where it really earns its keep. Both users subscribe to an `onSnapshot` listener on the same leaderboard path. The moment any score is submitted, Firestore pushes the updated data to every connected client simultaneously — no polling, no WebSocket server, no infrastructure. The leaderboard updates live on both screens in under a second.
+
+The mental model is this: instead of both users talking to your server who then talks to the database, both users talk directly to the database through a secure, permission-aware API. For a feature like shared challenges where multiple independent users need to collaborate on the same data in real time, this approach cuts the work down from weeks to an afternoon.
+
 
 **On Clerk for authentication**
 
